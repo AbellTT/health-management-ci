@@ -38,7 +38,7 @@ jobs:
 
       - name: Lint frontend source
         working-directory: frontend
-        run: npx eslint src --ext .js,.jsx
+        run: npm run lint
 
       - name: Lint backend source
         working-directory: backend
