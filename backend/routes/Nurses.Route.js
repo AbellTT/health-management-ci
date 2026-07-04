@@ -18,9 +18,9 @@ const {
 } = require("../models/Staff.model");
 const {
   addPatient,
-  findByStudentID,
-  updatePhone
-} = require("../models/Patient.model");
+  findById: findPatientByStudentId,
+} = require("../models/Patients.model");
+const dbhelper = require("../configs/dbhelper");
 const {
   addToQueue,
   assignDoctor,
@@ -69,7 +69,10 @@ router.post("/login", async (req, res) => {
 router.patch("/patient/phone", async (req, res) => {
   try {
     const { studentID, phoneNum } = req.body;
-    await updatePhone(phoneNum, studentID);
+    await dbhelper.query(
+      "UPDATE patients SET phonenum = $1 WHERE studentid = $2",
+      [phoneNum, studentID]
+    );
     res.send({ message: "Phone number updated" });
   } catch (error) {
     console.error(error);
@@ -190,23 +193,40 @@ router.patch("/:id", async (req, res) => {
 // Student/Patient Registration
 router.post("/register-patient", authenticate, async (req, res) => {
   try {
-    const existing = await findByStudentID(req.body.studentID);
-    if (existing && existing.length > 0) {
+    const studentId = req.body.studentID || req.body.studentid;
+    const existing = await findPatientByStudentId(studentId);
+    if (existing) {
       return res.send({ message: "Student already registered" });
     }
+
     // Set a default password for students if not provided
-    if (!req.body.password) {
-      req.body.password = "Student@123";
-    }
-    const newPatient = await addPatient(req.body);
+    const patientData = {
+      studentid: studentId?.trim().toUpperCase(),
+      name: req.body.name,
+      department: req.body.department,
+      year: req.body.year,
+      phonenum: req.body.phoneNum || req.body.phonenum,
+      emergencycontact: req.body.emergencyContact || req.body.emergencycontact,
+      email: req.body.email,
+      password: req.body.password || "Student@123",
+      age: req.body.age,
+      gender: req.body.gender,
+      bloodgroup: req.body.bloodGroup || req.body.bloodgroup || "O+",
+      allergies: req.body.allergies || "None",
+      dob: req.body.DOB || req.body.dob || new Date().toISOString().split("T")[0],
+      address: req.body.address,
+      docid: req.body.docid || req.body.docID || null,
+    };
+
+    const newPatient = await addPatient(patientData);
     
     // Log the action for analytics
     // Using req.user.id from the authenticate middleware
     if (req.user && req.user.id) {
-        await logAction(req.user.id, "CREATE_PATIENT", "patient", req.body.studentID, {
-            name: req.body.name,
-            department: req.body.department,
-            year: req.body.year
+        await logAction(req.user.id, "CREATE_PATIENT", "patient", patientData.studentid, {
+            name: patientData.name,
+            department: patientData.department,
+            year: patientData.year
         });
     }
     
@@ -221,9 +241,9 @@ router.get("/patient", async (req, res) => {
   try {
     const { studentID } = req.query;
     console.log("Searching for studentID:", studentID);
-    const student = await findByStudentID(studentID);
-    if (student && student.length > 0) {
-      res.send(student[0]);
+    const student = await findPatientByStudentId(studentID);
+    if (student) {
+      res.send(student);
     } else {
       res.status(404).send({ message: "Student not found" });
     }

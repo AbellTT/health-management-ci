@@ -12,7 +12,7 @@ const {
 const { getDoctorQueue, completeQueueItem } = require("../models/Queue.model");
 const { getPatientReports } = require("../models/Report.model");
 const { getAppointmentFromPatient } = require("../models/Appointment.model");
-const { findByStudentId } = require("../models/Patient.model");
+const { findById: findPatientByStudentId } = require("../models/Patients.model");
 const { getPatientLabHistory } = require("../models/Lab.model");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
@@ -286,11 +286,10 @@ router.get("/consultation/*", async (req, res) => {
   try {
     const studentId = req.params[0];
     console.log("Consultation requested for studentId (wildcard):", studentId);
-    const patientDetails = await findByStudentId(studentId);
-    if (!patientDetails || patientDetails.length === 0) {
+    const patient = await findPatientByStudentId(studentId);
+    if (!patient) {
       return res.status(404).send({ message: "Patient not found" });
     }
-    const patient = patientDetails[0];
     const patientStudentId = patient.studentid || patient.studentID;
 
     // 2. Fetch Medical History (Reports)
