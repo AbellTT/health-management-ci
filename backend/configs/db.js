@@ -46,13 +46,7 @@ const createPool = async () => {
       const poolConfig = {
         ...config,
         host: resolvedHost,
-        ssl:
-          originalHost !== "localhost" && originalHost !== "127.0.0.1"
-            ? {
-                rejectUnauthorized: false,
-                servername: originalHost,
-              }
-            : false,
+        ssl: config.ssl || false,
         connectionTimeoutMillis: 10000,
         max: 20,
         idleTimeoutMillis: 30000,
