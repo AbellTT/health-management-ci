@@ -1,4 +1,4 @@
-name: Day 3 CI/CD Pipeline
+name: Day 3 and Day 4 CI/CD Pipeline
 
 on:
   pull_request:
@@ -105,3 +105,19 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/health-management-frontend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/health-management-frontend:prod
+
+  deploy:
+    name: Trigger cloud deployment
+    needs: publish
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL is not configured."
+            exit 1
+          fi
+          curl --fail --show-error --silent "$RENDER_DEPLOY_HOOK_URL"
