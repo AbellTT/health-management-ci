@@ -9,7 +9,7 @@ import {
 import { AiOutlineEye, AiOutlinePrinter } from "react-icons/ai";
 import CertificateModal from "../Doctor/Certificate_Modal";
 
-const baseURL = process.env.REACT_APP_BASE_URL;
+const baseURL = process.env.REACT_APP_BASE_URL?.replace(/\/+$/, "");
 if (!baseURL) throw new Error("REACT_APP_BASE_URL is not defined in .env");
 
 const CertificatesPage = () => {
