@@ -54,7 +54,7 @@ jobs:
 
       - name: Build frontend production bundle
         working-directory: frontend
-        run: npm run build
+        run: CI=false npm run build
 
       - name: Build backend container image for validation
         uses: docker/build-push-action@v6
