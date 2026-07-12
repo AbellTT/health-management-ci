@@ -16,7 +16,7 @@ jobs:
       matrix:
         node-version: [20]
     steps:
-      - name: Checkout code
+      - name: download the repo on the ubuntu VM
         uses: actions/checkout@v4
 
       - name: Set up Node.js
@@ -76,7 +76,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: download the repo on the ubuntu VM
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
