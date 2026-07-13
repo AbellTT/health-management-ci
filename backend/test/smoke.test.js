@@ -1,24 +1,9 @@
-/**
- * Backend Test Suite — 10 Unit Tests
- *
- * These are pure unit tests: they do NOT connect to a database.
- * They test file structure, package configuration, business logic
- * extracted as pure functions, and critical application invariants.
- *
- * Tool: Node.js native test runner (node:test) — no extra packages needed.
- * Run:  npm test
- */
-
 'use strict';
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 /** Reads and parses the backend package.json once. */
 const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
