@@ -2,26 +2,6 @@
 # Sync this file from the Render dashboard to create/update the backend,
 # frontend, and PostgreSQL resources.
 
-envVarGroups:
-  - name: hms-shared-secrets
-    envVars:
-      - key: PORT
-        value: "3007"
-      - key: PG_SSL
-        value: "false"
-      - key: SMTP_HOST
-        value: smtp.gmail.com
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_MAIL
-        sync: false
-      - key: SMTP_PASSWORD
-        sync: false
-      - key: OPENROUTER_API_KEY
-        sync: false
-      - key: OPENROUTER_MODEL
-        value: deepseek/deepseek-chat-v3-0324:free
-
 services:
   - type: web
     name: health-management-backend
@@ -35,9 +15,8 @@ services:
         fromDatabase:
           name: health-management-db
           property: connectionString
-      - key: KEY
-        generateValue: true
-      - fromGroup: hms-shared-secrets
+      - fromGroup: health-management-env-group
+
 
   - type: web
     name: health-management-frontend
@@ -50,6 +29,7 @@ services:
           name: health-management-backend
           type: web
           envVarKey: RENDER_EXTERNAL_URL
+      - fromGroup: health-management-env-group
     routes:
       - type: rewrite
         source: /*
