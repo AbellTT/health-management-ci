@@ -21,18 +21,7 @@ services:
         value: "false"
       - key: KEY
         generateValue: true
-      - key: SMTP_HOST
-        value: smtp.gmail.com
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_MAIL
-        sync: false
-      - key: SMTP_PASSWORD
-        sync: false
-      - key: OPENROUTER_API_KEY
-        sync: false
-      - key: OPENROUTER_MODEL
-        value: deepseek/deepseek-chat-v3-0324:free
+      - fromGroup: health-management-secrets
 
   - type: web
     name: health-management-frontend
