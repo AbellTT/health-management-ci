@@ -1,0 +1,155 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: day5-nginx
+    depends_on:
+      - frontend
+      - backend-a
+      - backend-b
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - app_net
+
+  frontend:
+    build:
+      context: ../frontend
+    container_name: day5-frontend
+    environment:
+      CI: "false"
+      REACT_APP_BASE_URL: http://localhost:8080
+    expose:
+      - "80"
+    networks:
+      - app_net
+
+  backend-a:
+    build:
+      context: ../backend
+    container_name: day5-backend-a
+    env_file:
+      - ../backend/.env
+    environment:
+      PG_HOST: db
+      PORT: "3007"
+    expose:
+      - "3007"
+    depends_on:
+      - db
+    networks:
+      - app_net
+
+  backend-b:
+    build:
+      context: ../backend
+    container_name: day5-backend-b
+    env_file:
+      - ../backend/.env
+    environment:
+      PG_HOST: db
+      PORT: "3007"
+    expose:
+      - "3007"
+    depends_on:
+      - db
+    networks:
+      - app_net
+
+  db:
+    image: postgres:16
+    container_name: day5-postgres
+    restart: always
+    env_file:
+      - ./db.env
+    ports:
+      - "55433:5432"
+    volumes:
+      - day5_postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_net
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: day5-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - day5_prometheus_data:/prometheus
+    depends_on:
+      - cadvisor
+      - node-exporter
+      - nginx-exporter
+    networks:
+      - app_net
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: day5-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_DEFAULT_THEME: light
+    volumes:
+      - day5_grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - app_net
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: day5-cadvisor
+    privileged: true
+    ports:
+      - "8081:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - app_net
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: day5-node-exporter
+    command:
+      - --path.rootfs=/host
+    ports:
+      - "9100:9100"
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - app_net
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.4.0
+    container_name: day5-nginx-exporter
+    command:
+      - --nginx.scrape-uri=http://nginx:80/nginx_status
+    ports:
+      - "9113:9113"
+    depends_on:
+      - nginx
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge
+
+volumes:
+  day5_postgres_data:
+  day5_prometheus_data:
+  day5_grafana_data:
