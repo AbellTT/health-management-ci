@@ -2,6 +2,8 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        - "REACT_APP_BASE_URL=http://localhost:3007"
     env_file:
       - ./frontend/.env
     ports:

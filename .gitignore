@@ -4,3 +4,4 @@ backend/.env
 frontend/.env
 db.env
 day2-run/*.env
+day5-production/*.env

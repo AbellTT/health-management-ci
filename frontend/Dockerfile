@@ -9,6 +9,9 @@ RUN npm install
 
 COPY . .
 
+ARG REACT_APP_BASE_URL
+ENV REACT_APP_BASE_URL=$REACT_APP_BASE_URL
+
 RUN npm run build
 
 # Stage 2: Production stage
