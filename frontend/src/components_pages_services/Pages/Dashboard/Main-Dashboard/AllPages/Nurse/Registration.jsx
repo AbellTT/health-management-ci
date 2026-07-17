@@ -5,7 +5,7 @@ import Sidebar from "../../GlobalFiles/Sidebar";
 import axios from "axios";
 import "./CSS/Registration.css";
 
-const baseURL = process.env.REACT_APP_BASE_URL;
+const baseURL = process.env.REACT_APP_BASE_URL?.replace(/\/+$/, "");
 if (!baseURL) throw new Error("REACT_APP_BASE_URL is not defined in .env");
 
 const Registration = () => {

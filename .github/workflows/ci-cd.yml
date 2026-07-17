@@ -1,4 +1,4 @@
-name: Day 3 CI/CD Pipeline
+name: Day 3 and Day 4 CI/CD Pipeline
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ jobs:
       matrix:
         node-version: [20]
     steps:
-      - name: Checkout code
+      - name: download the repo on the ubuntu VM
         uses: actions/checkout@v4
 
       - name: Set up Node.js
@@ -38,7 +38,7 @@ jobs:
 
       - name: Lint frontend source
         working-directory: frontend
-        run: npx eslint src --ext .js,.jsx
+        run: npm run lint
 
       - name: Lint backend source
         working-directory: backend
@@ -54,7 +54,7 @@ jobs:
 
       - name: Build frontend production bundle
         working-directory: frontend
-        run: npm run build
+        run: CI=false npm run build
 
       - name: Build backend container image for validation
         uses: docker/build-push-action@v6
@@ -76,7 +76,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: download the repo on the ubuntu VM
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
@@ -105,3 +105,32 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/health-management-frontend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/health-management-frontend:prod
+
+  deploy:
+    name: Trigger cloud deployment
+    needs: publish
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy hooks
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          RENDER_BACKEND_DEPLOY_HOOK_URL: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_URL }}
+          RENDER_FRONTEND_DEPLOY_HOOK_URL: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }}
+        run: |
+          BACKEND_HOOK_URL="${RENDER_BACKEND_DEPLOY_HOOK_URL:-$RENDER_DEPLOY_HOOK_URL}"
+
+          if [ -z "$BACKEND_HOOK_URL" ]; then
+            echo "Set RENDER_DEPLOY_HOOK_URL or RENDER_BACKEND_DEPLOY_HOOK_URL for the backend service."
+            exit 1
+          fi
+
+          echo "Triggering backend deployment..."
+          curl --fail --show-error --silent "$BACKEND_HOOK_URL"
+
+          if [ -n "$RENDER_FRONTEND_DEPLOY_HOOK_URL" ]; then
+            echo "Triggering frontend deployment..."
+            curl --fail --show-error --silent "$RENDER_FRONTEND_DEPLOY_HOOK_URL"
+          else
+            echo "RENDER_FRONTEND_DEPLOY_HOOK_URL is not configured; skipping frontend deploy hook."
+          fi

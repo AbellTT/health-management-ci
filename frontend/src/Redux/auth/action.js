@@ -1,7 +1,7 @@
 import * as types from "./types";
 import axios from "axios";
 
-const baseURL = process.env.REACT_APP_BASE_URL;
+const baseURL = process.env.REACT_APP_BASE_URL?.replace(/\/+$/, "");
 if (!baseURL) throw new Error("REACT_APP_BASE_URL is not defined in .env");
 
 //login user

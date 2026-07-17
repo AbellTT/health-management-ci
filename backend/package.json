@@ -6,8 +6,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "node --test",
-    "lint": "npx eslint ."
+    "test": "node --test test/smoke.test.js",
+    "lint": "eslint .",
+    "test:db": "node --test test-db.js"
   },
   "keywords": [],
   "author": "",
