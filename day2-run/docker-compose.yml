@@ -4,7 +4,7 @@ services:
     env_file:
       - ./frontend.env
     ports:
-      - "3100:3000"
+      - "3100:80"
     depends_on:
       - backend
 
@@ -21,10 +21,8 @@ services:
     image: postgres:16
     container_name: shms-postgres-day2
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345678
-      POSTGRES_DB: healthcare
+    env_file:
+      - ./db.env
     ports:
       - "55432:5432"
     volumes:

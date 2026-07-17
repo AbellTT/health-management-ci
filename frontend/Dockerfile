@@ -1,4 +1,5 @@
-FROM node:20
+# Stage 1: Build stage
+FROM node:20 AS builder
 
 WORKDIR /app
 
@@ -8,6 +9,14 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 3000
+RUN npm run build
 
-CMD ["npm", "start"]
+# Stage 2: Production stage
+FROM nginx:alpine
+
+# Copy only the built static assets from stage 1 into Nginx's public directory
+COPY --from=builder /app/build /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

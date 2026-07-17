@@ -12,7 +12,7 @@ const QueueScreen = () => {
   React.useEffect(() => {
     const fetchQueue = async () => {
       try {
-          const baseURL = process.env.REACT_APP_BASE_URL;
+          const baseURL = process.env.REACT_APP_BASE_URL?.replace(/\/+$/, "");
           if (!baseURL) throw new Error("REACT_APP_BASE_URL is not defined in .env");
         const response = await fetch(
           `${baseURL}/public/queue`,

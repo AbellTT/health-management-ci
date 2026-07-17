@@ -1,3 +1,6 @@
 *.sql
 /.vscode
 backend/.env
+frontend/.env
+db.env
+day2-run/*.env
