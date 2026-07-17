@@ -13,7 +13,6 @@ const DoctorsModel = {
 
   addDoctor: async (doctor) => {
     const values = [
-      doctor.id,
       doctor.name,
       doctor.phonenum,
       doctor.email,

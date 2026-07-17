@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL = process.env.REACT_APP_BASE_URL?.replace(/\/+$/, "");
+const baseURL = process.env.REACT_APP_BASE_URL;
 if (!baseURL) throw new Error("REACT_APP_BASE_URL is not defined in .env");
 
 const buildHeaders = (token) => {

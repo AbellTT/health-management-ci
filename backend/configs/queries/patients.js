@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS patients (
     allergies TEXT,
     dob DATE NOT NULL,
     address VARCHAR(255) NOT NULL,
-    docid VARCHAR(50) REFERENCES doctors(id)
+    docid INTEGER REFERENCES doctors(id)
 );
 `;
 

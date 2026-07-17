@@ -7,16 +7,8 @@ const config = require("./config");
 let pool = null;
 let poolPromise = null;
 
-const getDatabaseHost = () => {
-  if (process.env.DATABASE_URL) {
-    return new URL(process.env.DATABASE_URL).hostname;
-  }
-
-  return process.env.PG_HOST || "localhost";
-};
-
 const resolveHost = async () => {
-  const originalHost = getDatabaseHost();
+  const originalHost = process.env.PG_HOST || "localhost";
 
   if (process.env.RESOLVED_PG_HOST) {
     return process.env.RESOLVED_PG_HOST;
@@ -48,6 +40,7 @@ const createPool = async () => {
 
   if (!poolPromise) {
     poolPromise = (async () => {
+      const originalHost = process.env.PG_HOST || "localhost";
       const resolvedHost = await resolveHost();
 
       const poolConfig = {
